@@ -31,3 +31,15 @@ You can then close the program.
 
 If the Spectrum Next doesn't print anything anymore or prints some garbage, it's likely to be the speed is too high for your machine.
 The slider can be set to reduce the speed to something supported by your machine.
+
+## Example file
+
+I've made all my tests with:
+https://github.com/hurricane-src/Files/raw/main/shtrtst.nex
+
+That program is another Spectrum Next project.
+* The music has been taken from a bunch of Atari ones.
+* The backround is a modified image originally taken from the NASA.
+* The sprites are assets bought on itch.io (Foozle)
+* The tileset is from yours truly (Yes, it's ugly).
+
