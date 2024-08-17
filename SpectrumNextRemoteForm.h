@@ -10,6 +10,7 @@
 #include <QTcpSocket>
 #include <QQueue>
 #include <QMutex>
+#include <QTimer>
 #include "NEX.h"
 
 QT_BEGIN_NAMESPACE
@@ -125,6 +126,23 @@ Q_OBJECT
         size_t _size;
     };
 
+    class DisconnectMessage:public Message
+    {
+    public:
+        DisconnectMessage(SpectrumNextRemoteForm* form):
+            Message(MessageType::Disconnect, form) {}
+        ~DisconnectMessage() { }
+
+        void execute() override
+        {
+            QTcpSocket* socket = _form->socket();
+            if(socket != nullptr)
+            {
+                socket->close();
+            }
+        }
+    };
+
     class GetBanksMessage: public SendMessage
     {
         static constexpr uint8_t _data[1] = {(uint8_t)RemoteCommand::GetBanks};
@@ -170,6 +188,7 @@ protected:
     void logFormat(const char *format, ...);
 
     void connectToHost();
+    void disconnectFromHost();
     void send(void *data, size_t size);
     void emptyQueue();
 
@@ -192,10 +211,12 @@ private slots:
     void remoteReadyRead();
     void remoteErrorOccurred(QAbstractSocket::SocketError);
 
+    void timerTimeout();
+
 private:
     Ui::SpectrumNextRemoteForm *ui;
     QSettings _settings;
-    //SpectrumNextRemote _remote;
+    QTimer _timer;
 
     QTcpSocket* _socket;
     QRecursiveMutex _message_queue_mtx;

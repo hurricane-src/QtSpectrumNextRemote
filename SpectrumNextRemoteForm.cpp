@@ -36,6 +36,7 @@ SpectrumNextRemoteForm::SpectrumNextRemoteForm(QWidget *parent) :
     connect(ui->addressLineEdit, SIGNAL(textEdited(QString)), this, SLOT(addressLineChanged(QString)));
     connect(ui->fileLineEdit, SIGNAL(textEdited(QString)), this, SLOT(fileLineChanged(QString)));
     connect(ui->flowHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(flowSliderValueChanged(int)));
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
 
     setAcceptDrops(true);
 }
@@ -150,6 +151,8 @@ void SpectrumNextRemoteForm::onGetBanksAnswer(GetBanksAnswerMessage& message)
     logLine(message.statusText());
     if(message.statusCode() >= 0)
     {
+        _timer.stop();
+
         if(_banks == nullptr)
         {
             _banks = new uint8_t[8];
@@ -365,31 +368,32 @@ void SpectrumNextRemoteForm::sendNEX()
 
     // disconnection should be a message so it's done when the queue is processed.
     // not really important though
+
+    logLine("Disconnecting");
+    disconnectFromHost();
 }
 
 void SpectrumNextRemoteForm::remote(Message* message)
 {
     _message_queue_mtx.lock();
-/*
-    QQueue<Message*>* queue;
-    switch(message->messageType())
-    {
-        case MessageType::Send:
-            queue = &_send_message_queue;
-            break;
-*/
+
     switch(message->messageType())
     {
         case MessageType::Send:
         {
             SendMessage* send_message = dynamic_cast<SendMessage*>(message);
-            qDebug() << "remote enqueue: " << (int)send_message->messageType() << " size " << send_message->size();
+            qDebug() << "remote enqueue: send, size " << send_message->size();
             break;
         }
         case MessageType::Recv:
         {
             RecvMessage* recv_message = dynamic_cast<RecvMessage*>(message);
-            qDebug() << "remote enqueue: " << (int)recv_message->messageType() << " size " << recv_message->size();
+            qDebug() << "remote enqueue: recv, size " << recv_message->size();
+            break;
+        }
+        case MessageType::Disconnect:
+        {
+            qDebug() << "remote enqueue: disconnect";
             break;
         }
         default:
@@ -547,7 +551,14 @@ void SpectrumNextRemoteForm::connectToHost()
     QObject::connect(_socket, &QTcpSocket::bytesWritten, this, &SpectrumNextRemoteForm::remoteBytesWritten); // ... does
     connect(_socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(remoteErrorOccurred(QAbstractSocket::SocketError)));
     logLine("connecting");
+
     _socket->connectToHost(ui->addressLineEdit->text(), ui->portLineEdit->text().toInt());
+    _timer.start(5000);
+}
+
+void SpectrumNextRemoteForm::disconnectFromHost()
+{
+    remote(new DisconnectMessage(this));
 }
 
 void SpectrumNextRemoteForm::send(void *data, size_t size)
@@ -578,9 +589,16 @@ void SpectrumNextRemoteForm::remoteDisconnected()
 {
     if(_socket != nullptr)
     {
-        delete _socket;
+        _socket->deleteLater();
         _socket = nullptr;
     }
+
+    emptyQueue();
+
+    ui->connectPushButton->setEnabled(true);
+    ui->addressLineEdit->setEnabled(true);
+    ui->sendPushButton->setEnabled(false);
+    _connected = false;
 }
 
 void SpectrumNextRemoteForm::remoteBytesWritten(quint64 bytes)
@@ -611,4 +629,12 @@ void SpectrumNextRemoteForm::remoteErrorOccurred(QAbstractSocket::SocketError er
     }
 
     emptyQueue();
+}
+
+void SpectrumNextRemoteForm::timerTimeout()
+{
+    qDebug() << "timeout";
+    _timer.stop();
+    emptyQueue();
+    disconnectFromHost();
 }
