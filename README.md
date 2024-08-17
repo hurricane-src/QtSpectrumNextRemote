@@ -42,6 +42,7 @@ That program is another Spectrum Next project.
 * The backround is a modified image originally taken from the NASA.
 * The sprites are assets bought on itch.io (Foozle)
 * The tileset is from yours truly (Yes, it's ugly).
+* Keys are Q,A,O,P,SPACE
 
 It may only work on 2M machines though as it's kind of big.
 

@@ -539,7 +539,7 @@ void SpectrumNextRemoteForm::connectToHost()
 {
     if(_socket != nullptr)
     {
-        abort();
+        return;
     }
 
     _socket = new QTcpSocket(this);
@@ -634,6 +634,10 @@ void SpectrumNextRemoteForm::remoteErrorOccurred(QAbstractSocket::SocketError er
 void SpectrumNextRemoteForm::timerTimeout()
 {
     qDebug() << "timeout";
+    if(!_connected)
+    {
+        remoteDisconnected();
+    }
     _timer.stop();
     emptyQueue();
     disconnectFromHost();
