@@ -33,7 +33,7 @@ You can then close the program.
 ```
 e.g.
 ```
-./QtSpectrumNextRemoteCLI --host 192.168.1.70  --file /home/login/Downloads/executable.nex --flow 8192
+./QtSpectrumNextRemoteCLI --host 192.168.1.70  --file /home/login/Downloads/executable.nex --rate 8192
 ```
 
 Using --help works too.

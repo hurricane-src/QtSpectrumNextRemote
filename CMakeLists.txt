@@ -17,7 +17,6 @@ find_package(Qt6 COMPONENTS
 add_executable(QtSpectrumNextRemote
         main.cpp
         NEX.cpp NEX.h
-        #SpectrumNextRemote.cpp SpectrumNextRemote.h
         SpectrumNextRemoteForm.cpp SpectrumNextRemoteForm.h SpectrumNextRemoteForm.ui
         RemoteCommand.h)
 
@@ -30,8 +29,7 @@ target_link_libraries(QtSpectrumNextRemote
 add_executable(QtSpectrumNextRemoteCLI
         main-cli.cpp
         NEX.cpp NEX.h
-        QtSpectrumNextRemoteTask.cpp
-        QtSpectrumNextRemoteTask.h)
+        QtSpectrumNextRemoteTask.cpp QtSpectrumNextRemoteTask.h)
 
 target_link_libraries(QtSpectrumNextRemoteCLI
         Qt::Core
