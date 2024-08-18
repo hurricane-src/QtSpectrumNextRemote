@@ -1,7 +1,3 @@
-//
-// Created by ediazfer on 14/08/24.
-//
-
 #include "NEX.h"
 #include <QFile>
 
@@ -14,12 +10,12 @@ NEX::NEX():_palette(nullptr),_layer2(nullptr),_ula(nullptr),
     _banks = new uint8_t*[BANK_COUNT];
 }
 
-uint8_t NEX::LoadingScreenBlocksInFile()
+uint8_t NEX::loadingScreenBlocksInFile()
 {
     return _header[10];
 }
 
-uint8_t NEX::GetPageAtIndex(int index)
+uint8_t NEX::getPageAtIndex(int index)
 {
     if(index < FIRST_BANK_INDEXES_COUNT)
     {
@@ -31,14 +27,14 @@ uint8_t NEX::GetPageAtIndex(int index)
     }
 }
 
-bool NEX::IsBankPresent(int page)
+bool NEX::isBankPresent(int page)
 {
     return _header[18 + page] != 0;
 }
 
-bool NEX::HasPalette()
+bool NEX::hasPalette()
 {
-    uint8_t blocks = LoadingScreenBlocksInFile();
+    uint8_t blocks = loadingScreenBlocksInFile();
 
     if((blocks & 5) != 0) // wtf is the tilemap mode?
     {
@@ -50,36 +46,36 @@ bool NEX::HasPalette()
     }
 }
 
-bool NEX::HasLayer2() { return (LoadingScreenBlocksInFile() & 1) != 0; }
-bool NEX::HasULA() { return (LoadingScreenBlocksInFile() & 2) != 0; }
-bool NEX::HasLoRes() { return (LoadingScreenBlocksInFile() & 4) != 0; }
-bool NEX::HasHiRes() { return (LoadingScreenBlocksInFile() & 8) != 0; }
-bool NEX::HasHiColour() { return (LoadingScreenBlocksInFile() & 16) != 0; }
+bool NEX::hasLayer2() { return (loadingScreenBlocksInFile() & 1) != 0; }
+bool NEX::hasULA() { return (loadingScreenBlocksInFile() & 2) != 0; }
+bool NEX::hasLoRes() { return (loadingScreenBlocksInFile() & 4) != 0; }
+bool NEX::hasHiRes() { return (loadingScreenBlocksInFile() & 8) != 0; }
+bool NEX::hasHiColour() { return (loadingScreenBlocksInFile() & 16) != 0; }
 
 uint16_t NEX::SP() { return *((uint16_t*)&_header[12]); }
 uint16_t NEX::PC() { return *((uint16_t*)&_header[14]); }
-uint8_t NEX::Entry16kbank() { return (uint8_t)_header[139]; }
+uint8_t NEX::entry16kbank() { return (uint8_t)_header[139]; }
 
-bool NEX::Uses16KBank(uint8_t bank)
+bool NEX::uses16KBank(uint8_t bank)
 {
     if(/*bank >= 0 && */bank < 112)
     {
-        return IsBankPresent(bank);
+        return isBankPresent(bank);
     }
     return false;
 }
 
-bool NEX::Uses8KBank(uint8_t bank)
+bool NEX::uses8KBank(uint8_t bank)
 {
     bank >>= 1;
     if(/*bank >= 0 && */bank < 112)
     {
-        return IsBankPresent(bank);
+        return isBankPresent(bank);
     }
     return false;
 }
 
-bool NEX::Load(const QString& filename)
+bool NEX::load(const QString& filename)
 {
     for(int i = 0; i < BANK_COUNT; ++i)
     {
@@ -100,7 +96,7 @@ bool NEX::Load(const QString& filename)
         //throw new FormatException();
         return false;
     }
-    if(HasPalette())
+    if(hasPalette())
     {
         _palette = new uint8_t[512];
         fs.read((char*)_palette, 512);
@@ -110,7 +106,7 @@ bool NEX::Load(const QString& filename)
         _palette = nullptr;
     }
 
-    if(HasLayer2())
+    if(hasLayer2())
     {
         _layer2 = new uint8_t[49152];
         fs.read((char*)_layer2, 49152);
@@ -120,7 +116,7 @@ bool NEX::Load(const QString& filename)
         _layer2 = nullptr;
     }
 
-    if(HasULA())
+    if(hasULA())
     {
         _ula = new uint8_t[6912];
         fs.read((char*)_ula, 6912);
@@ -130,7 +126,7 @@ bool NEX::Load(const QString& filename)
         _ula = nullptr;
     }
 
-    if(HasLoRes())
+    if(hasLoRes())
     {
         _lores = new uint8_t[12288];
         fs.read((char*)_lores, 12288);
@@ -140,7 +136,7 @@ bool NEX::Load(const QString& filename)
         _lores = nullptr;
     }
 
-    if(HasHiRes())
+    if(hasHiRes())
     {
         _hires = new uint8_t[12288];
         fs.read((char*)_hires, 12288);
@@ -150,7 +146,7 @@ bool NEX::Load(const QString& filename)
         _hires = nullptr;
     }
 
-    if(HasHiColour())
+    if(hasHiColour())
     {
         _hicolour = new uint8_t[12288];
         fs.read((char*)_hicolour, 12288);
@@ -164,8 +160,8 @@ bool NEX::Load(const QString& filename)
 
     for(int i = 0; i < 112; ++i)
     {
-        int bank = GetPageAtIndex(i);
-        if(IsBankPresent(bank))
+        int bank = getPageAtIndex(i);
+        if(isBankPresent(bank))
         {
             _banks[bank] = new uint8_t[16384];
             fs.read((char*)_banks[bank], 16384);
@@ -175,7 +171,7 @@ bool NEX::Load(const QString& filename)
     return true;
 }
 
-uint8_t* NEX::GetPage(uint8_t page)
+uint8_t* NEX::getPage(uint8_t page)
 {
     if(/*page >= 0 && */page < BANK_COUNT)
     {

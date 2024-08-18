@@ -1,7 +1,3 @@
-//
-// Created by ediazfer on 15/08/24.
-//
-
 // You may need to build the project (run Qt uic code generator) to get "ui_SpectrumNextRemoteForm.h" resolved
 
 #include "SpectrumNextRemoteForm.h"
@@ -85,7 +81,7 @@ bool SpectrumNextRemoteForm::loadNEX(const QString& program)
     if(program.endsWith(".nex"))
     {
         NEX *nex = new NEX();
-        if(nex->Load(program))
+        if(nex->load(program))
         {
             if(_nex != nullptr)
             {
@@ -208,7 +204,7 @@ void SpectrumNextRemoteForm::sendNEX()
         return;
     }
 
-    if((_banks != nullptr) && _nex->Uses8KBank(_banks[0]))
+    if((_banks != nullptr) && _nex->uses8KBank(_banks[0]))
     {
         logLine("Bank conflict with the server: Can't load this NEX");
         //MessageBox.Show("Bank conflict with the server", "Can't load this NEX", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -255,7 +251,7 @@ void SpectrumNextRemoteForm::sendNEX()
             page = 2;
         }
 
-        uint8_t* data = _nex->GetPage(page);
+        uint8_t* data = _nex->getPage(page);
 
         if(data == nullptr)
         {

@@ -24,23 +24,23 @@ protected:
 
 public:
     NEX();
-    bool Load(const QString& filename);
-    uint8_t *GetPage(uint8_t page);
+    bool load(const QString& filename);
+    uint8_t *getPage(uint8_t page);
 
 private:
-    uint8_t LoadingScreenBlocksInFile();
-    uint8_t GetPageAtIndex(int index);
-    bool IsBankPresent(int page);
-    bool HasPalette();
-    bool HasLayer2();
-    bool HasULA();
-    bool HasLoRes();
-    bool HasHiRes();
-    bool HasHiColour();
-    uint8_t Entry16kbank();
+    uint8_t loadingScreenBlocksInFile();
+    uint8_t getPageAtIndex(int index);
+    bool isBankPresent(int page);
+    bool hasPalette();
+    bool hasLayer2();
+    bool hasULA();
+    bool hasLoRes();
+    bool hasHiRes();
+    bool hasHiColour();
+    uint8_t entry16kbank();
 public:
     uint16_t SP();
     uint16_t PC();
-    bool Uses16KBank(uint8_t bank);
-    bool Uses8KBank(uint8_t bank);
+    bool uses16KBank(uint8_t bank);
+    bool uses8KBank(uint8_t bank);
 };

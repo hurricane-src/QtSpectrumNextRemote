@@ -18,10 +18,21 @@ add_executable(QtSpectrumNextRemote
         main.cpp
         NEX.cpp NEX.h
         #SpectrumNextRemote.cpp SpectrumNextRemote.h
-        SpectrumNextRemoteForm.cpp SpectrumNextRemoteForm.h SpectrumNextRemoteForm.ui)
+        SpectrumNextRemoteForm.cpp SpectrumNextRemoteForm.h SpectrumNextRemoteForm.ui
+        RemoteCommand.h)
+
 target_link_libraries(QtSpectrumNextRemote
         Qt::Core
         Qt::Gui
         Qt::Widgets
-        Qt::Network
-)
+        Qt::Network)
+
+add_executable(QtSpectrumNextRemoteCLI
+        main-cli.cpp
+        NEX.cpp NEX.h
+        QtSpectrumNextRemoteTask.cpp
+        QtSpectrumNextRemoteTask.h)
+
+target_link_libraries(QtSpectrumNextRemoteCLI
+        Qt::Core
+        Qt::Network)

@@ -16,7 +16,7 @@ cmake
 make
 ```
 
-## How to use
+## How to use the GUI
 Have the WiFi of your Spectrum Next set to an IP address.
 Have wifiupld.nex running
 
@@ -26,6 +26,17 @@ Select the .nex you want to upload and press "Send".
 The Spectrum Next should print some lines about setting banks.
 When all is done, the program should start automatically.
 You can then close the program.
+
+## How to use the command line
+```
+./QtSpectrumNextRemoteCLI --host spectrumnext_address --file /path/to/executable.nex [--rate bytes/s]
+```
+e.g.
+```
+./QtSpectrumNextRemoteCLI --host 192.168.1.70  --file /home/login/Downloads/executable.nex --flow 8192
+```
+
+Using --help works too.
 
 ## Trouble
 
