@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Hurricane");
     QCoreApplication::setOrganizationDomain("hurrikhan.eu");
     QCoreApplication::setApplicationName("SpectrumNextRemoteCLI");
-    QCoreApplication::setApplicationVersion("1.0.0");
+    QCoreApplication::setApplicationVersion("1.1.0");
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Spectrum Next Remote");

@@ -9,8 +9,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Hurricane");
     QCoreApplication::setOrganizationDomain("hurrikhan.eu");
     QCoreApplication::setApplicationName("SpectrumNextRemote");
-    QCoreApplication::setApplicationVersion("1.0.3");
-
+    QCoreApplication::setApplicationVersion("1.1.0");
 
     SpectrumNextRemoteForm spectrumNextRemoteForm;
     spectrumNextRemoteForm.show();

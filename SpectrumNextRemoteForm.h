@@ -160,8 +160,8 @@ public:
     ~SpectrumNextRemoteForm() override;
 
 protected:
-    void dragEnterEvent(QDragEnterEvent* event);
-    void dropEvent(QDropEvent* event);
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     bool loadNEX(const QString& program);
     void sendNEX();
     void getBanks();
@@ -186,6 +186,7 @@ public:
 private slots:
     void connectPressed();
     void sendPressed();
+    void browsePressed();
     void addressLineChanged(const QString& text);
     void fileLineChanged(const QString& text);
 
@@ -202,6 +203,7 @@ private slots:
 private:
     Ui::SpectrumNextRemoteForm *ui;
     QSettings _settings;
+    QString _workingDirectory;
     QTimer _timer;
 
     QTcpSocket* _socket;

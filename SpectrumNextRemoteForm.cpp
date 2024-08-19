@@ -7,9 +7,13 @@
 #include <QDebug>
 #include <QThread>
 #include <QDateTime>
+#include <QFileDialog>
+#include <QDir>
 
 SpectrumNextRemoteForm::SpectrumNextRemoteForm(QWidget *parent) :
-    QWidget(parent), ui(new Ui::SpectrumNextRemoteForm), _socket(nullptr), _nex(nullptr), _connected(false)
+    QWidget(parent), ui(new Ui::SpectrumNextRemoteForm), _socket(nullptr),
+    _flow_bytes_sent(0), _flow_epoch(0),
+    _nex(nullptr), _banks(nullptr), _connected(false)
 {
     ui->setupUi(this);
     QString spectrumNextAddress = _settings.value("SpectrumNextAddress").toString();
@@ -23,6 +27,9 @@ SpectrumNextRemoteForm::SpectrumNextRemoteForm(QWidget *parent) :
     {
         ui->fileLineEdit->setText(lastProgram);
     }
+
+    _workingDirectory = _settings.value("WorkingDirectory", QDir::homePath()).toString();
+
     _flow_kbs = _settings.value("Flow", 8192).toInt();
     ui->flowHorizontalSlider->setValue(_flow_kbs);
     ui->flowLineEdit->setText(QString::number(_flow_kbs)); // yes, I mean to convert back
@@ -32,6 +39,7 @@ SpectrumNextRemoteForm::SpectrumNextRemoteForm(QWidget *parent) :
     connect(ui->addressLineEdit, SIGNAL(textEdited(QString)), this, SLOT(addressLineChanged(QString)));
     connect(ui->fileLineEdit, SIGNAL(textEdited(QString)), this, SLOT(fileLineChanged(QString)));
     connect(ui->flowHorizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(flowSliderValueChanged(int)));
+    connect(ui->browsePushButton, SIGNAL(clicked()), this, SLOT(browsePressed()));
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
 
     setAcceptDrops(true);
@@ -175,6 +183,25 @@ void SpectrumNextRemoteForm::sendPressed()
     sendNEX();
 }
 
+void SpectrumNextRemoteForm::browsePressed()
+{
+    QString caption("Open a .nex file");
+    QString filter("NEX File (*.nex)");
+    QFileDialog fileDialog(this, caption, _workingDirectory, filter);
+    fileDialog.setModal(true);
+    fileDialog.setFileMode(QFileDialog::FileMode::ExistingFile);
+    if(fileDialog.exec())
+    {
+        _workingDirectory = fileDialog.directory().path();
+        if(_workingDirectory.compare(_settings.value("WorkingDirectory").toString()) != 0)
+        {
+            _settings.setValue("WorkingDirectory", _workingDirectory);
+        }
+        ui->fileLineEdit->setText(fileDialog.selectedFiles().first());
+        loadNEX(ui->fileLineEdit->text());
+    }
+}
+
 void SpectrumNextRemoteForm::addressLineChanged(const QString& text)
 {
     ui->connectPushButton->setEnabled(!text.isEmpty());
@@ -182,10 +209,7 @@ void SpectrumNextRemoteForm::addressLineChanged(const QString& text)
 
 void SpectrumNextRemoteForm::fileLineChanged(const QString& text)
 {
-    if(loadNEX(text))
-    {
-        _settings.setValue("LastProgram", text);
-    }
+    loadNEX(text);
 }
 
 void SpectrumNextRemoteForm::flowSliderValueChanged(int)
@@ -210,6 +234,8 @@ void SpectrumNextRemoteForm::sendNEX()
         //MessageBox.Show("Bank conflict with the server", "Can't load this NEX", MessageBoxButtons.OK, MessageBoxIcon.Error);
         return;
     }
+
+    ui->sendPushButton->setEnabled(false);
 
     uint8_t set_banks_command[6] =
     {
@@ -334,7 +360,7 @@ void SpectrumNextRemoteForm::sendNEX()
         0xed, 0x91, 0x50, 0xff, // restores the ROM                                         // 6
         0x31, 0xfe, 0xff, // SP                                                             // 10
         0xc3, 0x00, 0x80, // PC                                                             // 13
-        (uint8_t)RemoteCommand::JumpTo, 0xf0, 0xff                                          // 16
+        (uint8_t)RemoteCommand::CloseAndJumpTo, 0xf0, 0xff                                  // 16
     };
 
     int sp = _nex->SP();
@@ -362,7 +388,7 @@ void SpectrumNextRemoteForm::sendNEX()
 
     send(bootstrap_command, sizeof(bootstrap_command));
 
-    // disconnection should be a message so it's done when the queue is processed.
+    // disconnection should be a message, so it's done when the queue is processed.
     // not really important though
 
     logLine("Disconnecting");
@@ -411,7 +437,6 @@ void SpectrumNextRemoteForm::remoteSendProgress(int n)
 {
     logFormat("remoteSendProgress(%i)", n);
     qDebug() << "remoteSendProgress(" << n << ")";
-    //QThread::msleep(25);
 
     int64_t now = QDateTime::currentMSecsSinceEpoch();
     int64_t dt = now - _flow_epoch;

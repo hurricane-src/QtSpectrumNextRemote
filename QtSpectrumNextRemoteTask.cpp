@@ -71,7 +71,14 @@ int QtSpectrumNextRemoteTask::send(const void* data, size_t size)
     if(n != size)
     {
         // I don't expect this to happen. If it does, please tell me.
-        std::cerr << "unexpected short write: " << n << "/" << size << " bytes sent" << std::endl;
+        if(n >= 0)
+        {
+            std::cerr << "unexpected short write: " << n << "/" << size << " bytes sent" << std::endl;
+        }
+        else
+        {
+            std::cerr << "error during write: " << _socket.errorString().toStdString() << std::endl;
+        }
         return -1;
     }
 
@@ -233,7 +240,7 @@ void QtSpectrumNextRemoteTask::sendNEX(NEX& nex)
         0xed, 0x91, 0x50, 0xff, // restores the ROM                                         // 6
         0x31, 0xfe, 0xff, // SP                                                             // 10
         0xc3, 0x00, 0x80, // PC                                                             // 13
-        (uint8_t)RemoteCommand::JumpTo, 0xf0, 0xff                                          // 16
+        (uint8_t)RemoteCommand::CloseAndJumpTo, 0xf0, 0xff                                  // 16
     };
 
     int sp = nex.SP();
@@ -259,6 +266,6 @@ void QtSpectrumNextRemoteTask::sendNEX(NEX& nex)
 
     send(bootstrap_command, sizeof(bootstrap_command));
 
-    // disconnection should be a message so it's done when the queue is processed.
+    // disconnection should be a message, so it's done when the queue is processed.
     // not really important though
 }

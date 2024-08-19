@@ -137,11 +137,18 @@
        <property name="title">
         <string>Executable</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QLineEdit" name="fileLineEdit">
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="browsePushButton">
+          <property name="text">
+           <string>Browse</string>
           </property>
          </widget>
         </item>
